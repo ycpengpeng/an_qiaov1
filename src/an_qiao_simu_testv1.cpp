@@ -14,14 +14,16 @@
 #include <core.h>
 
 
-using namespace Eigen;
 
-Vector3d current_p;
+
+
 Quaterniond current_att;
 mavros_msgs::State current_state;
 ros::Publisher pva_pub;
-
-int stateStep=0;
+Vector3d last_current_v(0,0,0);
+Vector3d last_a(0,0,0);
+ros::Time last_time;
+int stateStep=1;
 
 
 void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
@@ -34,8 +36,25 @@ void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
     dronePoseCurrent.pose.orientation.y=msg->pose.orientation.y;
     dronePoseCurrent.pose.orientation.z=msg->pose.orientation.z;
     dronePoseCurrent.pose.orientation.w=msg->pose.orientation.w;
+    current_p(0)=msg->pose.position.x;
+    current_p(1)=msg->pose.position.y;
+    current_p(2)=msg->pose.position.z;
+
 
     //ROS_INFO("X:%f Y:%f  Z:%f",-current_p(0),current_p(1),current_p(2));
+}
+
+void velocity_sub_cb(const geometry_msgs::TwistStamped::ConstPtr& msg)
+{
+    current_v << msg->twist.linear.x, msg->twist.linear.y, msg->twist.linear.z;
+    current_a=(current_v-last_current_v)/(ros::Time::now().toSec()-last_time.toSec());
+    if(current_a(0)>100||current_a(0)<-100)
+    {
+        current_a=last_a;
+    }
+    last_time=ros::Time::now();
+    last_current_v=current_v;
+    last_a=current_a;
 }
 
 
@@ -53,46 +72,41 @@ int main(int argc, char** argv)
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("/mavros/state", 1, stateCallback);
     ros::Subscriber pose_sub = nh.subscribe<geometry_msgs::PoseStamped>("/mavros/local_position/pose", 1, positionCallback);
 
+    ros::Subscriber velocity_sub = nh.subscribe<geometry_msgs::TwistStamped>("mavros/local_position/velocity_local", 1, velocity_sub_cb);
 
     ros::ServiceClient arming_client = nh.serviceClient<mavros_msgs::CommandBool>("mavros/cmd/arming");
     ros::ServiceClient set_mode_client = nh.serviceClient<mavros_msgs::SetMode>("mavros/set_mode");
 
     pubTargetPoint = nh.advertise<trajectory_msgs::JointTrajectoryPoint>("/set_point", 1);
 
-    ros::Publisher local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 1);
+    local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 1);
 
 
     ros::Rate loop_rate(LOOPRATE);
 
-    double take_off_height = 1.5;
-    double take_off_acc = 0.1;
-    double take_off_time=sqrt(take_off_height/take_off_acc)*2.0;
-    double delt_t = 1.0 / LOOPRATE;
-    double take_off_send_times = take_off_time / delt_t;
+
+
     int counter = 0;
     int take_off_init=1;
 
     Vector3d take_off_position;
-    ros::Time last_time=ros::Time::now();
+    last_time=ros::Time::now();
     // wait for FCU connection
-    while(ros::ok() && !current_state.connected){
-        ros::spinOnce();
-        loop_rate.sleep();
-    }
+
     mavros_msgs::SetMode offb_set_mode;
     offb_set_mode.request.custom_mode = "OFFBOARD";
 
     mavros_msgs::CommandBool arm_cmd;
     arm_cmd.request.value = true;
     ros::Time last_request = ros::Time::now();
-    geometry_msgs::PoseStamped pose;
+
 
     double yaw_set = 3.1415926;
     int mode=0;
     double z_sp=0;
     double vz_sp=0;
-    ROS_INFO("Arm and ta1111keoff");
-    int offb_init=1;
+    ROS_INFO("an_qiao_simu_testv1 is running");
+    int offb_init=0;
 
     while(ros::ok())
     {
@@ -101,6 +115,9 @@ int main(int argc, char** argv)
         if(current_state.mode != "OFFBOARD" || !current_state.armed)
         {
             offb_init=1;
+      //      ROS_INFO("22");
+            ros::spinOnce();
+            dronePoseCurrent.header.stamp = ros::Time::now();
             local_pos_pub.publish(dronePoseCurrent);
 
             continue;
@@ -111,7 +128,7 @@ int main(int argc, char** argv)
         {
             if(hover_sec(5)==0)
             {
-                ROS_INFO_THROTTLE(5,"HOVER!!!");
+                ROS_INFO_THROTTLE(5,"in to off board HOVER!!!");
                 continue;
             }
             for(int i=0;i<=5;i++)
@@ -134,7 +151,7 @@ int main(int argc, char** argv)
             }
             case 1:
             {
-                ROS_INFO_ONCE("CASE 1!!!  go to point 0");
+                ROS_ERROR_ONCE("  go to point 0");
 
                 if(go_to_point(0))
                 {
@@ -142,20 +159,10 @@ int main(int argc, char** argv)
                 }
                 break;
             }
+
             case 2:
             {
-                ROS_INFO_ONCE("CASE 2  hover!!!");
-
-
-                if(hover_sec(10))
-                {
-                    stateStep++;
-                }
-                break;
-            }
-            case 3:
-            {
-                ROS_INFO_ONCE("CASE 3!!!   go to point 1");
+                ROS_ERROR_ONCE("   go to point 1");
 
                 if(go_to_point(1))
                 {
@@ -164,25 +171,25 @@ int main(int argc, char** argv)
                 break;
             }
 
-            case 4:
-            {
-                ROS_INFO_ONCE("CASE 4  hover!!!");
-               // ROS_INFO_ONCE("CURRENT Y:%F", dronePoseCurrent.pose.position.y  );
 
-                if(hover_sec(10))
+            case 3:
+            {
+                ROS_ERROR_ONCE("  go to point 2!!!");
+
+                if(go_to_point(2))
                 {
                     stateStep++;
                 }
                 break;
             }
 
-            case 5:
+            case 4:
             {
-                ROS_INFO_ONCE("CASE 5  go to point 2!!!");
+                ROS_ERROR_ONCE("  go to point 3!!!");
 
-                if(go_to_point(2))
+                if(go_to_point(3))
                 {
-                    stateStep=5;
+                    stateStep=4;
                 }
                 break;
             }

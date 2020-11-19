@@ -7,6 +7,7 @@
 
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <mavros_msgs/AttitudeTarget.h>
 #include <geometry_msgs/Vector3.h>
 #include <geometry_msgs/Quaternion.h>
@@ -34,15 +35,20 @@
 #include <Eigen/Geometry>
 #include <Eigen/Core>
 #include <chrono>
-
+using namespace Eigen;
 #define LOOPRATE 40.0
+#define delta_t 0.025
 
 extern trajectory_msgs::JointTrajectoryPoint TargetPointMsg;
 extern ros::Publisher pubTargetPoint;
+extern ros::Publisher local_pos_pub;
 extern geometry_msgs::PoseStamped dronePoseCurrent;
+extern int hover_atpoint;
+extern Vector3d current_p;
+extern Vector3d current_v;
+extern Vector3d current_a;
 
 bool hover_sec(int hover_sec);
-
 bool go_to_point(int pointnumber);
 void setoffbpva();
 

@@ -151,17 +151,15 @@ include_directories(
 
 add_executable(an_qiao_simu_testv1 src/an_qiao_simu_testv1.cpp lib/jump_loops.cpp  lib/core.cpp)
 target_link_libraries(an_qiao_simu_testv1 ${catkin_LIBRARIES})
-
 target_include_directories(an_qiao_simu_testv1
-        PRIVATE ${PROJECT_SOURCE_DIR}/lib
+        PUBLIC ${PROJECT_SOURCE_DIR}/lib
         )
-add_executable(an_qiao_actuator src/an_qiao_actuator.cpp )
+#[[add_executable(an_qiao_actuator src/an_qiao_actuator.cpp )
 target_link_libraries(an_qiao_actuator ${catkin_LIBRARIES})
 target_include_directories(an_qiao_actuator
         PRIVATE ${PROJECT_SOURCE_DIR}/lib
-        )
-#add_executable(an_qiao_actuator src/an_qiao_actuator.cpp)
-#target_link_libraries(an_qiao_actuator ${catkin_LIBRARIES})
+        )]]
+
 
 
 

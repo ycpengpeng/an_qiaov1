@@ -570,7 +570,7 @@ int main(int argc, char** argv)
         {
             if(I<t_number)
             {
-
+                pose.header.stamp = ros::Time::now();
                 pose.pose.position.x = p_t(I,0);
                 pose.pose.position.y = p_t(I,1);
                 pose.pose.position.z = p_t(I,2);
@@ -580,14 +580,14 @@ int main(int argc, char** argv)
                 pose.pose.orientation.y=0;
                 pose.pose.orientation.z=sin(yaw_t(I)/2);
                 //ROS_INFO("Y::%f",pose.pose.position.y);
-                local_pos_pub.publish(pose);
+               // local_pos_pub.publish(pose);
                 I++;
             }
             if(t_number!=0&&I!=0&&I==t_number)
             {
                // ROS_INFO_THROTTLE(2,"BBB");
-
-                local_pos_pub.publish(pose);
+                pose.header.stamp = ros::Time::now();
+               // local_pos_pub.publish(pose);
             }
         }
 
