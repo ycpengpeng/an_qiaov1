@@ -24,6 +24,7 @@ Vector3d last_current_v(0,0,0);
 Vector3d last_a(0,0,0);
 ros::Time last_time;
 int stateStep=1;
+int offb_flag=1;
 
 
 void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
@@ -119,7 +120,7 @@ int main(int argc, char** argv)
             ros::spinOnce();
             dronePoseCurrent.header.stamp = ros::Time::now();
             local_pos_pub.publish(dronePoseCurrent);
-
+            offb_flag=0;
             continue;
         }
 
@@ -128,13 +129,15 @@ int main(int argc, char** argv)
         {
             if(hover_sec(5)==0)
             {
-                ROS_INFO_THROTTLE(5,"in to off board HOVER!!!");
+                ROS_INFO_THROTTLE(5,"into offboard HOVER!!!");
                 continue;
             }
+
             for(int i=0;i<=5;i++)
             {
                 TargetPoint[i][9]+=0.001;
             }
+            ROS_INFO("finish into offboard HOVER!!!");
         }
         offb_init=0;
 
@@ -151,7 +154,7 @@ int main(int argc, char** argv)
             }
             case 1:
             {
-                ROS_ERROR_ONCE("  go to point 0");
+                ROS_ERROR_ONCE("  ------go to point 0");
 
                 if(go_to_point(0))
                 {
@@ -162,7 +165,7 @@ int main(int argc, char** argv)
 
             case 2:
             {
-                ROS_ERROR_ONCE("   go to point 1");
+                ROS_ERROR_ONCE("   -----------go to point 1");
 
                 if(go_to_point(1))
                 {
@@ -174,7 +177,7 @@ int main(int argc, char** argv)
 
             case 3:
             {
-                ROS_ERROR_ONCE("  go to point 2!!!");
+                ROS_ERROR_ONCE(" -------- go to point 2!!!");
 
                 if(go_to_point(2))
                 {
@@ -185,7 +188,7 @@ int main(int argc, char** argv)
 
             case 4:
             {
-                ROS_ERROR_ONCE("  go to point 3!!!");
+                ROS_ERROR_ONCE(" ---------- go to point 3!!!");
 
                 if(go_to_point(3))
                 {

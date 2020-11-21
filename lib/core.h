@@ -47,7 +47,7 @@ extern int hover_atpoint;
 extern Vector3d current_p;
 extern Vector3d current_v;
 extern Vector3d current_a;
-
+extern int offb_flag;
 bool hover_sec(int hover_sec);
 bool go_to_point(int pointnumber);
 void setoffbpva();

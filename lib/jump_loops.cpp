@@ -194,10 +194,10 @@ bool go_to_point(int pointnumber)
     }
     else
     {
-        ROS_INFO("motion primitives---");
+        //ROS_INFO("motion primitives---");
 
         motion_primitives_with_table(current_p,current_v,current_a,planned_p,planned_v,planned_a,t_number,planned_yaw);
-        ROS_INFO("T_NUMBER  %d",t_number);
+        //ROS_INFO("T_NUMBER  %d",t_number);
         go_to_point_count=0;
     }
 
@@ -235,7 +235,7 @@ bool go_to_point(int pointnumber)
     }
     go_to_point_count++;
 
-    if(fabs(dronePoseCurrent.pose.position.x-planned_p(0))<0.05 &&
+/*    if(fabs(dronePoseCurrent.pose.position.x-planned_p(0))<0.05 &&
        fabs(dronePoseCurrent.pose.position.y-planned_p(1))<0.05 &&
        fabs(dronePoseCurrent.pose.position.z-planned_p(2))<0.05)
     {
@@ -254,7 +254,52 @@ bool go_to_point(int pointnumber)
         }
     //    hover_atpoint--;
 
+    }*/
+
+    if(fabs(dronePoseCurrent.pose.position.x-planned_p(0))<0.1 &&
+       fabs(dronePoseCurrent.pose.position.y-planned_p(1))<0.1 &&
+       fabs(dronePoseCurrent.pose.position.z-planned_p(2))<0.1&&time_flag==0&&offb_flag==0)
+    {
+        ROS_INFO("return to  point %d  after manual control",pointnumber);
+        time_flag=1;
+        offb_flag=1;
+        return true;
     }
+
+
+
+
+    if(fabs(dronePoseCurrent.pose.position.x-planned_p(0))<0.05 &&
+       fabs(dronePoseCurrent.pose.position.y-planned_p(1))<0.05 &&
+       fabs(dronePoseCurrent.pose.position.z-planned_p(2))<0.05&&time_flag==1)
+    {
+
+
+        time_flag=0;
+        offb_flag=1;
+        last_hover_time=ros::Time::now();
+        ROS_INFO_THROTTLE(2,"arrive at point  %d",pointnumber);
+
+
+    }
+
+    if(time_flag==0&&offb_flag==1)
+    {
+        ROS_ERROR_THROTTLE(2,"hover at point %d , you can change to manual control ",pointnumber);
+        if(ros::Time::now() - last_hover_time > ros::Duration(5.0))
+        {
+            time_flag=1;
+            return true;
+        }
+
+    }
+
+
+
+
+
+
+
     return false;
 
 
