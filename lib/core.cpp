@@ -5,6 +5,7 @@
 
 ros::Publisher pubTargetPoint;
 ros::Publisher local_pos_pub;
+ros::Publisher cur_point_pub;
 trajectory_msgs::JointTrajectoryPoint TargetPointMsg;
 geometry_msgs::PoseStamped dronePoseCurrent;
 int hover_atpoint=200;

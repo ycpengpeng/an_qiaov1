@@ -154,6 +154,11 @@ target_link_libraries(an_qiao_simu_testv1 ${catkin_LIBRARIES})
 target_include_directories(an_qiao_simu_testv1
         PUBLIC ${PROJECT_SOURCE_DIR}/lib
         )
+
+add_executable(an_qiao_pub_test src/an_qiao_pub_test.cpp )
+target_link_libraries(an_qiao_pub_test ${catkin_LIBRARIES})
+
+
 #[[add_executable(an_qiao_actuator src/an_qiao_actuator.cpp )
 target_link_libraries(an_qiao_actuator ${catkin_LIBRARIES})
 target_include_directories(an_qiao_actuator

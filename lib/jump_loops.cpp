@@ -20,6 +20,7 @@ geometry_msgs::PoseStamped pose;
 int go_to_point_count=0;
 ros::Time last_hover_time;
 int time_flag=1;
+double last_motion_primitive_flag=0;
 
 double TargetPoint[6][10] =
         {
@@ -183,13 +184,31 @@ void motion_primitives_with_table(Vector3d p0,Vector3d v0,Vector3d a0,Vector3d p
 bool go_to_point(int pointnumber)
 {
 
-    planned_p << TargetPoint[pointnumber][0], TargetPoint[pointnumber][1],TargetPoint[pointnumber][2];
+/*    planned_p << TargetPoint[pointnumber][0], TargetPoint[pointnumber][1],TargetPoint[pointnumber][2];
 
     planned_yaw = TargetPoint[pointnumber][3];
     planned_v << TargetPoint[pointnumber][4], TargetPoint[pointnumber][5], TargetPoint[pointnumber][6];
-    planned_a << TargetPoint[pointnumber][7], TargetPoint[pointnumber][8], TargetPoint[pointnumber][9];
+    planned_a << TargetPoint[pointnumber][7], TargetPoint[pointnumber][8], TargetPoint[pointnumber][9];*/
 
-    if(last_planned_p==planned_p&&last_planned_az==planned_a(2))
+
+   // cur_point_pub.publish(path_point.poses[0].header.frame_id);
+   std_msgs::String point_name;
+    point_name.data=path_point.poses[pointnumber].header.frame_id;
+
+    cur_point_pub.publish(point_name);
+
+    if(pointnumber==0)
+    {
+
+        ROS_ERROR_ONCE("go to point %d",pointnumber);
+
+    }
+    planned_p<<path_point.poses[pointnumber].pose.position.x,path_point.poses[pointnumber].pose.position.y,
+            path_point.poses[pointnumber].pose.position.z;
+    planned_yaw=0;
+
+    //if(last_planned_p==planned_p&&last_planned_az==planned_a(2))
+    if(last_planned_p==planned_p&&motion_primitive_flag==last_motion_primitive_flag)
     {
     }
     else
@@ -202,7 +221,8 @@ bool go_to_point(int pointnumber)
     }
 
     last_planned_p=planned_p;
-    last_planned_az=planned_a(2);
+    //last_planned_az=planned_a(2);
+    last_motion_primitive_flag=motion_primitive_flag;
 
     if(go_to_point_count<t_number)
     {

@@ -18,6 +18,8 @@
 #include <nav_msgs/Odometry.h>
 #include <std_msgs/Bool.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <nav_msgs/Path.h>
+#include <std_msgs/String.h>
 
 #include <cstdlib>
 #include <stdlib.h>
@@ -48,6 +50,9 @@ extern Vector3d current_p;
 extern Vector3d current_v;
 extern Vector3d current_a;
 extern int offb_flag;
+extern nav_msgs::Path path_point;
+extern double motion_primitive_flag;
+extern ros::Publisher cur_point_pub;
 bool hover_sec(int hover_sec);
 bool go_to_point(int pointnumber);
 void setoffbpva();

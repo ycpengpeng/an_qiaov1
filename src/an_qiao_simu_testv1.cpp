@@ -11,6 +11,7 @@
 #include <mavros_msgs/CommandBool.h>
 #include <mavros_msgs/SetMode.h>
 
+
 #include <core.h>
 
 
@@ -26,6 +27,10 @@ ros::Time last_time;
 int stateStep=1;
 int offb_flag=1;
 
+int numberofpoint;
+nav_msgs::Path path_point;
+int init_read_path=1;
+double motion_primitive_flag=0;
 
 void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
@@ -37,6 +42,7 @@ void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
     dronePoseCurrent.pose.orientation.y=msg->pose.orientation.y;
     dronePoseCurrent.pose.orientation.z=msg->pose.orientation.z;
     dronePoseCurrent.pose.orientation.w=msg->pose.orientation.w;
+
     current_p(0)=msg->pose.position.x;
     current_p(1)=msg->pose.position.y;
     current_p(2)=msg->pose.position.z;
@@ -57,6 +63,23 @@ void velocity_sub_cb(const geometry_msgs::TwistStamped::ConstPtr& msg)
     last_current_v=current_v;
     last_a=current_a;
 }
+
+void path_cb(const nav_msgs::Path::ConstPtr& msg)
+{
+    if(init_read_path==1)
+    {
+
+
+        path_point=*msg;
+        numberofpoint= path_point.poses.size();
+        ROS_INFO("----- numberofpoint %d",numberofpoint);
+        init_read_path=0;
+        ROS_INFO("-------read path point success----");
+
+    }
+
+}
+
 
 
 void stateCallback(const mavros_msgs::State::ConstPtr &msg)
@@ -81,6 +104,11 @@ int main(int argc, char** argv)
     pubTargetPoint = nh.advertise<trajectory_msgs::JointTrajectoryPoint>("/set_point", 1);
 
     local_pos_pub = nh.advertise<geometry_msgs::PoseStamped>("mavros/setpoint_position/local", 1);
+
+    ros::Subscriber path_sub=nh.subscribe<nav_msgs::Path>("/quayside/target_point", 1, path_cb);
+
+    cur_point_pub= nh.advertise<std_msgs::String>("/cur_point_name", 1);
+
 
 
     ros::Rate loop_rate(LOOPRATE);
@@ -107,7 +135,14 @@ int main(int argc, char** argv)
     double z_sp=0;
     double vz_sp=0;
     ROS_INFO("an_qiao_simu_testv1 is running");
+
+    while(init_read_path==1)
+    {
+        ros::spinOnce();
+        loop_rate.sleep();
+    }
     int offb_init=0;
+    int point=0;
 
     while(ros::ok())
     {
@@ -133,15 +168,32 @@ int main(int argc, char** argv)
                 continue;
             }
 
-            for(int i=0;i<=5;i++)
+/*            for(int i=0;i<=5;i++)
             {
                 TargetPoint[i][9]+=0.001;
-            }
+            }*/
+
+            motion_primitive_flag+=0.001;
             ROS_INFO("finish into offboard HOVER!!!");
+            ROS_ERROR("go to point %d",point);
         }
         offb_init=0;
 
-        switch (stateStep)
+        if(point>=numberofpoint)
+        {
+            point=numberofpoint;
+        }
+
+        if(go_to_point(point))
+        {
+
+            point++;
+            ROS_ERROR("go to point %d",point);
+
+        }
+
+
+/*        switch (stateStep)
         {
             case 0:
             {
@@ -198,7 +250,7 @@ int main(int argc, char** argv)
             }
 
 
-        }
+        }*/
 
 
     }
