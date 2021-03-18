@@ -142,7 +142,7 @@ void motion_primitives_with_table(Vector3d p0,Vector3d v0,Vector3d a0,Vector3d p
     delt_y=(pf(1)-p0(1));
     delt_z=(pf(2)-p0(2));
 
-    double v_set=0.5;//速度设为0.5m/s
+    double v_set=1.0;  ////////////////////////////////////速度设为0.5m/s
 
     T1 = fabs(delt_x/v_set);
     T2 =fabs(delt_y/v_set);
@@ -197,12 +197,12 @@ bool go_to_point(int pointnumber)
 
     cur_point_pub.publish(point_name);
 
-    if(pointnumber==0)
-    {
-
-        ROS_ERROR_ONCE("go to point %d",pointnumber);
-
-    }
+//    if(pointnumber==0)
+//    {
+//
+//        ROS_ERROR_ONCE("go to point %d",pointnumber);
+//
+//    }
     planned_p<<path_point.poses[pointnumber].pose.position.x,path_point.poses[pointnumber].pose.position.y,
             path_point.poses[pointnumber].pose.position.z;
     planned_yaw=0;

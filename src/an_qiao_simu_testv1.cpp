@@ -32,6 +32,8 @@ nav_msgs::Path path_point;
 int init_read_path=1;
 double motion_primitive_flag=0;
 
+int get_new_path=0;
+
 void positionCallback(const geometry_msgs::PoseStamped::ConstPtr &msg)
 {
 
@@ -66,17 +68,47 @@ void velocity_sub_cb(const geometry_msgs::TwistStamped::ConstPtr& msg)
 
 void path_cb(const nav_msgs::Path::ConstPtr& msg)
 {
-    if(init_read_path==1)
+//    if(init_read_path==1)
+//    {
+//        path_point=*msg;
+//        numberofpoint= path_point.poses.size();
+//        ROS_INFO("----- numberofpoint %d",numberofpoint);
+//        init_read_path=0;
+//        ROS_INFO("-------read path point success----");
+//    }
+
+    int arraysEqual=1;
+    if (msg->poses.size()!=path_point.poses.size())
     {
+        arraysEqual=false;
 
+    }
+    else
+    {
+        int count=0;
+        while (arraysEqual && count < msg->poses.size())
+        {
+            if (msg->poses[count].pose.position.x != path_point.poses[count].pose.position.x
+                ||msg->poses[count].pose.position.y != path_point.poses[count].pose.position.y
+                ||msg->poses[count].pose.position.z != path_point.poses[count].pose.position.z
+            )
+                arraysEqual = false;
+            count++;
+        }
 
+    }
+    if(arraysEqual== false)
+    {
+        get_new_path=1;
         path_point=*msg;
         numberofpoint= path_point.poses.size();
         ROS_INFO("----- numberofpoint %d",numberofpoint);
         init_read_path=0;
         ROS_INFO("-------read path point success----");
-
     }
+
+
+
 
 }
 
@@ -136,7 +168,7 @@ int main(int argc, char** argv)
     double vz_sp=0;
     ROS_INFO("an_qiao_simu_testv1 is running");
 
-    while(init_read_path==1)
+    while(get_new_path==0)
     {
         ros::spinOnce();
         loop_rate.sleep();
@@ -148,6 +180,16 @@ int main(int argc, char** argv)
     {
         ros::spinOnce();
         loop_rate.sleep();
+
+        if(get_new_path)
+        {
+            point=0;
+            get_new_path=0;
+
+            offb_init=1;
+            offb_flag=0;
+        }
+
         if(current_state.mode != "OFFBOARD" || !current_state.armed)
         {
             offb_init=1;
@@ -175,20 +217,26 @@ int main(int argc, char** argv)
 
             motion_primitive_flag+=0.001;
             ROS_INFO("finish into offboard HOVER!!!");
-            ROS_ERROR("go to point %d",point);
+            ROS_ERROR("go to point %d : ( %f,% f, %f)",point,
+                      path_point.poses[point].pose.position.x,path_point.poses[point].pose.position.y,path_point.poses[point].pose.position.z);
+
+
         }
         offb_init=0;
 
-        if(point>=numberofpoint)
-        {
-            point=numberofpoint;
-        }
+
 
         if(go_to_point(point))
         {
 
             point++;
-            ROS_ERROR("go to point %d",point);
+            if(point>=numberofpoint-1)
+            {
+                point=numberofpoint-1;
+            }
+            ROS_ERROR("go to point %d : ( %f,% f, %f)",point,
+                    path_point.poses[point].pose.position.x,path_point.poses[point].pose.position.y,path_point.poses[point].pose.position.z);
+
 
         }
 

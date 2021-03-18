@@ -42,7 +42,7 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::Rate loop_rate(40);
 
-    ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("zph", 1);
+    ros::Publisher path_pub = nh.advertise<nav_msgs::Path>("/quayside/target_point", 1);
 
 
   //  ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>("/mavros/state", 1, stateCallback);
@@ -64,25 +64,25 @@ int main(int argc, char** argv)
 
     pose.pose.position.x = 0;
     pose.pose.position.y = 0;
-    pose.pose.position.z = 1;
+    pose.pose.position.z = 4;
     path.poses.push_back(pose);
 
-    pose.pose.position.x = 0;
-    pose.pose.position.y = 0;
-    pose.pose.position.z = 3;
-    path.poses.push_back(pose);
-
-
-    pose.pose.position.x = 0;
-    pose.pose.position.y = 0;
-    pose.pose.position.z = 5;
-    path.poses.push_back(pose);
-
-
-    pose.pose.position.x = 0;
-    pose.pose.position.y = 0;
-    pose.pose.position.z = 7;
-    path.poses.push_back(pose);
+//    pose.pose.position.x = 0;
+//    pose.pose.position.y = 0;
+//    pose.pose.position.z = 3;
+//    path.poses.push_back(pose);
+//
+//
+//    pose.pose.position.x = 0;
+//    pose.pose.position.y = 0;
+//    pose.pose.position.z = 5;
+//    path.poses.push_back(pose);
+//
+//
+//    pose.pose.position.x = 0;
+//    pose.pose.position.y = 0;
+//    pose.pose.position.z = 7;
+//    path.poses.push_back(pose);
 
 
 
